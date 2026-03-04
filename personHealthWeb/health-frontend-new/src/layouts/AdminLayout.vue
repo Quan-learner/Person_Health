@@ -5,7 +5,7 @@
       <el-aside width="240px" class="aside">
         <div class="logo-container">
           <div class="logo-icon-wrapper">
-            <el-icon class="logo-icon" :size="24"><Odometer /></el-icon>
+            <img src="/logo.png" alt="Logo" class="logo-img" />
           </div>
           <span class="logo-title">康健未来</span>
         </div>
@@ -187,13 +187,21 @@ html.dark {
 }
 
 .logo-icon-wrapper {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-radius: 10px;
+  width: 48px;
+  height: 48px;
+  background: white;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .logo-icon {
@@ -201,10 +209,11 @@ html.dark {
 }
 
 .logo-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--aside-logo-text, #ffffff);
   transition: color 0.3s;
+  letter-spacing: 0.5px;
 }
 
 .admin-menu {

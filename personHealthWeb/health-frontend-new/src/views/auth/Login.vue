@@ -111,10 +111,8 @@ const switchMode = (mode) => {
     <div class="login-box" :class="{ 'reg-mode': isRegister }">
       
       <div class="login-header">
-        <div class="logo-icon">
-            <el-icon :style="{ color: themeColor }">
-                <component :is="isRegister ? EditPen : Odometer" />
-            </el-icon>
+        <div class="logo-wrapper">
+          <img src="/logo.png" alt="Logo" class="logo-img" />
         </div>
         <h2>{{ isRegister ? '注册新账号' : '康健未来' }}</h2>
         <p class="sub-title">{{ isRegister ? '加入康健未来，开启健康生活' : '您的个人健康管理专家' }}</p>
@@ -179,8 +177,25 @@ const switchMode = (mode) => {
   transition: all 0.3s ease;
 }
 
-.login-header { text-align: center; margin-bottom: 25px; }
-.logo-icon { font-size: 44px; margin-bottom: 10px; transition: color 0.3s; }
+.login-header { text-align: center; margin-bottom: 25px; display: flex; flex-direction: column; align-items: center; }
+.logo-wrapper {
+  width: 64px;
+  height: 64px;
+  background: white;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+  transition: all 0.3s ease;
+}
+.logo-img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
 .login-header h2 { margin: 0; color: #2c3e50; font-size: 24px; font-weight: 600; }
 .sub-title { margin: 6px 0 0; color: #7f8c8d; font-size: 13px; }
 

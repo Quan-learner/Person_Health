@@ -6,7 +6,7 @@
         <!-- 左侧 Logo -->
         <div class="logo">
           <div class="logo-icon-wrapper">
-            <el-icon class="logo-icon" :size="24"><Odometer /></el-icon>
+            <img src="/logo.png" alt="Logo" class="logo-img" />
           </div>
           <span class="logo-text">康健未来</span>
         </div>
@@ -192,7 +192,7 @@ const handleLogout = () => {
   background-color: #ffffff;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   border-bottom: 1px solid #e8e8e8;
-  height: 64px;
+  height: 72px;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -217,15 +217,22 @@ const handleLogout = () => {
 }
 
 .logo-icon-wrapper {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-radius: 10px;
+  width: 54px;
+  height: 54px;
+  background: white;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 12px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  margin-right: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .logo-icon {
@@ -233,19 +240,20 @@ const handleLogout = () => {
 }
 
 .logo-text {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
 }
 
 .nav-content {
   flex: 1;
   display: flex;
   align-items: center;
+  height: 100%;
 }
 
 /* 右侧导航容器 */
@@ -260,21 +268,27 @@ const handleLogout = () => {
 .nav-menu {
   background-color: transparent !important;
   border-bottom: none !important;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 :deep(.el-menu--horizontal) {
   border-bottom: none !important;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 :deep(.el-menu-item) {
   font-size: 14px;
   font-weight: 500;
   color: #606266 !important;
-  padding: 0 18px !important;
-  height: 64px !important;
-  line-height: 64px !important;
+  padding: 0 20px !important;
+  height: 72px !important;
+  line-height: 72px !important;
   border-bottom: none !important;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -283,11 +297,12 @@ const handleLogout = () => {
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
+  position: relative;
 }
 
 :deep(.el-menu-item:hover) {
   color: #10b981 !important;
-  background-color: rgba(16, 185, 129, 0.05) !important;
+  background-color: transparent !important;
 }
 
 :deep(.el-menu-item.is-active) {
@@ -295,24 +310,6 @@ const handleLogout = () => {
   font-weight: 600;
   background-color: transparent !important;
   border-bottom: none !important;
-}
-
-/* 解决菜单项文字加粗导致的宽度抖动 */
-.menu-item-text {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.menu-item-text::after {
-  content: attr(data-text);
-  height: 0;
-  visibility: hidden;
-  overflow: hidden;
-  user-select: none;
-  pointer-events: none;
-  font-weight: 600; /* 这里的权重应与 active 状态一致 */
 }
 
 :deep(.el-menu-item.is-active::after) {
@@ -327,10 +324,29 @@ const handleLogout = () => {
   border-radius: 2px;
 }
 
+/* 解决菜单项文字加粗导致的宽度抖动 */
+.menu-item-text {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.menu-item-text::after {
+  content: attr(data-text);
+  height: 0;
+  visibility: hidden;
+  overflow: hidden;
+  user-select: none;
+  pointer-events: none;
+  font-weight: 600;
+}
+
 /* 下拉菜单子项激活样式 */
 :deep(.el-menu--horizontal .el-menu .el-menu-item.is-active) {
   color: #10b981 !important;
-  background-color: rgba(16, 185, 129, 0.05) !important;
+  background-color: transparent !important;
 }
 
 /* 右侧工具箱图标 */
@@ -431,7 +447,7 @@ const handleLogout = () => {
   margin: 0 auto;
   padding: 24px;
   overflow: visible !important; /* 确保 position: sticky 生效 */
-  min-height: calc(100vh - 64px); /* 防止页面高度变化导致跳动 */
+  min-height: calc(100vh - 72px); /* 防止页面高度变化导致跳动 */
 }
 
 .user-main.no-top-padding {

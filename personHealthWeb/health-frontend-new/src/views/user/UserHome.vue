@@ -1001,7 +1001,7 @@ const formatDate = (dateStr) => {
   font-size: 15px;
   font-weight: 600;
   border: none;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #2ed29b 0%, #059669 100%);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
   transition: all 0.3s ease;
   display: flex;

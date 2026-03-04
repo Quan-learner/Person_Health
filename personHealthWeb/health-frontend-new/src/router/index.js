@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useUserStore } from "@/stores/user.js";
 
 const routes = [
-  { path: "/login", component: () => import("@/views/auth/Login.vue") },
+  { path: "/login", component: () => import("@/views/auth/Login.vue"), meta: { title: "登录" } },
   { path: "/", redirect: "/login" },
 
   // 管理员模块（建议使用嵌套路由，以便统一使用 AdminLayout）
@@ -58,47 +58,47 @@ const routes = [
       {
         path: "home",
         component: () => import("@/views/user/UserHome.vue"),
-        meta: { requiresAuth: true, role: "user" },
+        meta: { requiresAuth: true, role: "user", title: "首页" },
       },
       {
         path: "recipes",
         component: () => import("@/views/user/UserRecipes.vue"),
-        meta: { requiresAuth: true, role: "user" },
+        meta: { requiresAuth: true, role: "user", title: "健康食谱" },
       },
       {
         path: "diet",
         component: () => import("@/views/user/UserDietRecord.vue"),
-        meta: { requiresAuth: true, role: "user" },
+        meta: { requiresAuth: true, role: "user", title: "饮食记录" },
       },
       {
         path: "data",
         component: () => import("@/views/user/UserData.vue"),
-        meta: { requiresAuth: true, role: "user" },
+        meta: { requiresAuth: true, role: "user", title: "数据统计" },
       },
       {
         path: "article/:id",
         component: () => import("@/views/user/UserArticleDetail.vue"),
-        meta: { requiresAuth: true, role: "user" },
+        meta: { requiresAuth: true, role: "user", title: "资讯详情" },
       },
       {
         path: "recipe/:id",
         component: () => import("@/views/user/RecipeDetail.vue"),
-        meta: { requiresAuth: true, role: "user" },
+        meta: { requiresAuth: true, role: "user", title: "食谱详情" },
       },
       {
         path: "records",
         component: () => import("@/views/user/UserHealthRecords.vue"),
-        meta: { requiresAuth: true, role: "user" },
+        meta: { requiresAuth: true, role: "user", title: "健康档案" },
       },
       {
         path: "favorites",
         component: () => import("@/views/user/UserCollections.vue"),
-        meta: { requiresAuth: true, role: "user" },
+        meta: { requiresAuth: true, role: "user", title: "我的收藏" },
       },
       {
         path: "my-articles",
         component: () => import("@/views/user/MyArticles.vue"),
-        meta: { requiresAuth: true, role: "user" },
+        meta: { requiresAuth: true, role: "user", title: "我的动态" },
       },
     ],
   },
@@ -132,6 +132,14 @@ router.beforeEach((to, from, next) => {
     alert("权限不足，您无法访问此页面");
     // 如果是管理员页面进不去，可以退回到登录页或用户首页
     return next("/login");
+  }
+
+  // 动态设置标题
+  const baseTitle = '康健未来';
+  if (to.meta.title) {
+    document.title = `${to.meta.title} - ${baseTitle}`;
+  } else {
+    document.title = baseTitle;
   }
 
   next(); // 只有以上规则都通过了，才放行
