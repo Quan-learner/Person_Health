@@ -40,6 +40,10 @@
             <el-icon><Search /></el-icon>
             搜索
           </el-button>
+          <el-button type="primary" class="add-btn" @click="handleAdd">
+            <el-icon><Plus /></el-icon>
+            新增文章
+          </el-button>
         </div>
       </div>
       <el-table :data="articleList" style="width: 100%" v-loading="loading">
@@ -112,6 +116,9 @@
                   <el-dropdown-item @click="handleView(row)">
                     <el-icon><View /></el-icon>预览
                   </el-dropdown-item>
+                  <el-dropdown-item @click="handleEdit(row)">
+                    <el-icon><Edit /></el-icon>编辑
+                  </el-dropdown-item>
                   <el-dropdown-item @click="handleDelete(row)" divided class="delete-item">
                     <el-icon><Delete /></el-icon>删除
                   </el-dropdown-item>
@@ -137,7 +144,93 @@
       </div>
     </el-card>
 
-    <!-- Read-only View Dialog (Optional, currently uses handleView which opens new window) -->
+    <!-- Add/Edit Dialog -->
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogMode === 'add' ? '新增健康文章' : '编辑健康文章'"
+      width="700px"
+      class="article-dialog"
+      destroy-on-close
+    >
+      <el-form
+        ref="articleFormRef"
+        :model="articleForm"
+        :rules="articleRules"
+        label-width="100px"
+        class="article-form"
+      >
+        <el-form-item label="文章标题" prop="title">
+          <el-input v-model="articleForm.title" placeholder="请输入文章标题" maxlength="100" show-word-limit />
+        </el-form-item>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="文章分类" prop="category">
+              <el-select v-model="articleForm.category" placeholder="请选择分类" class="w-full">
+                <el-option
+                  v-for="cat in categories"
+                  :key="cat.code"
+                  :label="cat.name"
+                  :value="cat.code"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="审核状态" prop="checkState" v-if="dialogMode === 'edit'">
+              <el-select v-model="articleForm.checkState" placeholder="请选择审核状态" class="w-full">
+                <el-option label="待审核" :value="0" />
+                <el-option label="已通过" :value="1" />
+                <el-option label="已驳回" :value="2" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-form-item label="文章封面" prop="cover">
+          <div class="cover-upload-wrapper">
+            <el-upload
+              class="cover-uploader"
+              :show-file-list="false"
+              :http-request="customUploadRequest"
+              :before-upload="beforeUpload"
+              accept="image/*"
+            >
+              <img v-if="articleForm.cover" :src="articleForm.cover" class="cover-preview" />
+              <el-icon v-else class="cover-uploader-icon"><Plus /></el-icon>
+            </el-upload>
+            <div class="upload-tip">建议尺寸 16:9，小于 2MB 的 jpg/png 格式</div>
+          </div>
+        </el-form-item>
+
+        <el-form-item label="文章简介" prop="briefIntroduction">
+          <el-input
+            v-model="articleForm.briefIntroduction"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入文章简短介绍..."
+            maxlength="200"
+            show-word-limit
+          />
+        </el-form-item>
+
+        <el-form-item label="文章内容" prop="content">
+          <el-input
+            v-model="articleForm.content"
+            type="textarea"
+            :rows="10"
+            placeholder="请输入文章正文内容..."
+          />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitArticle" :loading="submitLoading">确定</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -148,11 +241,19 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { 
   Search, MoreFilled, 
   CircleCheck, Delete, View, Picture, Plus,
-  ArrowDown
+  Edit
 } from '@element-plus/icons-vue';
 import request from '@/utils/request';
 import { useTokenStore } from '@/stores/token';
 import { useUserStore } from '@/stores/user';
+import { 
+  getArticleListService, 
+  getCategoriesService, 
+  addArticleService, 
+  updateArticleService, 
+  deleteArticleService 
+} from '@/api/article';
+import { uploadFileService } from '@/api/upload';
 
 const router = useRouter();
 const tokenStore = useTokenStore();
@@ -184,7 +285,7 @@ const categories = ref([]);
 // Fetch Categories
 const fetchCategories = async () => {
   try {
-    const res = await request.get('/healthPort/categories');
+    const res = await getCategoriesService();
     if (res.code === 200 || res.code === 0) {
       categories.value = res.data;
     }
@@ -197,14 +298,12 @@ const fetchCategories = async () => {
 const fetchArticles = async () => {
   loading.value = true;
   try {
-    const res = await request.get('/healthPort/list', {
-      params: {
-        pageNum: pageNum.value,
-        pageSize: pageSize.value,
-        titleport: searchQuery.value || undefined,
-        category: selectedCategory.value || undefined,
-        checkState: selectedCheckState.value !== null ? selectedCheckState.value : undefined
-      }
+    const res = await getArticleListService({
+      pageNum: pageNum.value,
+      pageSize: pageSize.value,
+      titleport: searchQuery.value || undefined,
+      category: selectedCategory.value || undefined,
+      checkState: selectedCheckState.value !== null ? selectedCheckState.value : undefined
     });
     if (res.code === 200 || res.code === 0) {
       articleList.value = res.data.records || [];
@@ -215,6 +314,30 @@ const fetchArticles = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// Dialog State
+const dialogVisible = ref(false);
+const dialogMode = ref('add'); // 'add' or 'edit'
+const submitLoading = ref(false);
+const articleFormRef = ref(null);
+const articleForm = ref({
+  id: null,
+  title: '',
+  category: null,
+  cover: '',
+  briefIntroduction: '',
+  content: '',
+  checkState: 1, // 管理员默认审核通过
+  username: ''
+});
+
+const articleRules = {
+  title: [{ required: true, message: '请输入文章标题', trigger: 'blur' }],
+  category: [{ required: true, message: '请选择文章分类', trigger: 'change' }],
+  cover: [{ required: true, message: '请上传文章封面', trigger: 'change' }],
+  briefIntroduction: [{ required: true, message: '请输入文章简介', trigger: 'blur' }],
+  content: [{ required: true, message: '请输入文章内容', trigger: 'blur' }]
 };
 
 // Get Check State Labels
@@ -255,11 +378,9 @@ const handleCheck = (row) => {
       center: true
     }
   ).then(async () => {
-    // Approve
     updateState(row.id, 1);
   }).catch(async (action) => {
     if (action === 'cancel') {
-      // Reject
       updateState(row.id, 2);
     }
   });
@@ -285,6 +406,101 @@ const handleView = (row) => {
   window.open(`/#/user/article/${row.id}`, '_blank');
 };
 
+// Handle Add
+const handleAdd = () => {
+  dialogMode.value = 'add';
+  articleForm.value = {
+    id: null,
+    title: '',
+    category: null,
+    cover: '',
+    briefIntroduction: '',
+    content: '',
+    checkState: 1,
+    username: userStore.userInfo.username
+  };
+  dialogVisible.value = true;
+};
+
+// Handle Edit
+const handleEdit = (row) => {
+  dialogMode.value = 'edit';
+  articleForm.value = {
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    cover: row.cover,
+    briefIntroduction: row.briefIntroduction,
+    content: row.content,
+    checkState: row.checkState,
+    username: row.username
+  };
+  dialogVisible.value = true;
+};
+
+// Image Upload
+const beforeUpload = (file) => {
+  const isJPGorPNG = file.type === 'image/jpeg' || file.type === 'image/png';
+  const isLt2M = file.size / 1024 / 1024 < 2;
+
+  if (!isJPGorPNG) {
+    ElMessage.error('封面只能是 JPG/PNG 格式!');
+  }
+  if (!isLt2M) {
+    ElMessage.error('封面大小不能超过 2MB!');
+  }
+  return isJPGorPNG && isLt2M;
+};
+
+const customUploadRequest = async (options) => {
+  const { file, onProgress, onSuccess, onError } = options;
+  try {
+    const res = await uploadFileService(file);
+    if (res.code === 200 || res.code === 0) {
+      articleForm.value.cover = res.data;
+      onSuccess(res.data);
+      ElMessage.success('上传成功');
+    } else {
+      onError(new Error(res.message || '上传失败'));
+      ElMessage.error(res.message || '上传失败');
+    }
+  } catch (err) {
+    onError(err);
+    ElMessage.error('上传失败');
+  }
+};
+
+// Submit Article
+const submitArticle = () => {
+  if (!articleFormRef.value) return;
+  articleFormRef.value.validate(async (valid) => {
+    if (valid) {
+      submitLoading.value = true;
+      try {
+        let res;
+        if (dialogMode.value === 'add') {
+          res = await addArticleService(articleForm.value);
+        } else {
+          res = await updateArticleService(articleForm.value);
+        }
+
+        if (res.code === 200 || res.code === 0) {
+          ElMessage.success(dialogMode.value === 'add' ? '新增成功' : '修改成功');
+          dialogVisible.value = false;
+          fetchArticles();
+        } else {
+          ElMessage.error(res.message || '提交失败');
+        }
+      } catch (err) {
+        console.error('提交失败:', err);
+        ElMessage.error('提交失败，请重试');
+      } finally {
+        submitLoading.value = false;
+      }
+    }
+  });
+};
+
 // Handle Delete
 const handleDelete = async (row) => {
   try {
@@ -294,7 +510,7 @@ const handleDelete = async (row) => {
       type: 'warning'
     });
     
-    const res = await request.delete('/healthPort/delete', { params: { id: row.id } });
+    const res = await deleteArticleService(row.id);
     if (res.code === 200 || res.code === 0) {
       ElMessage.success('删除成功');
       fetchArticles();
@@ -306,11 +522,6 @@ const handleDelete = async (row) => {
   }
 };
 
-// Handle Add
-const handleAdd = () => {
-  ElMessage.info('新增资讯功能开发中，敬请期待');
-};
-
 onMounted(() => {
   fetchCategories();
   fetchArticles();
@@ -320,35 +531,6 @@ onMounted(() => {
 <style scoped>
 .health-info-container {
   padding: 0;
-}
-
-.action-bar {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.right-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.search-input {
-  width: 240px;
-}
-
-.search-input :deep(.el-input__wrapper) {
-  border-radius: 8px;
-  background-color: #f9fafb;
-  box-shadow: none;
-  border: 1px solid #e5e7eb;
-}
-
-.add-btn {
-  border-radius: 8px;
-  padding: 0 20px;
-  height: 36px;
 }
 
 .table-card {
@@ -408,6 +590,13 @@ onMounted(() => {
   width: 220px;
 }
 
+.search-input :deep(.el-input__wrapper) {
+  border-radius: 10px;
+  background-color: #f8fafc;
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
+}
+
 .search-input :deep(.el-input__wrapper.is-focus) {
   border-color: #10b981;
 }
@@ -425,6 +614,18 @@ onMounted(() => {
 .action-btn:hover {
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
   color: #ffffff;
+}
+
+.add-btn {
+  height: 36px;
+  border-radius: 10px;
+  background: #10b981;
+  border-color: #10b981;
+}
+
+.add-btn:hover {
+  background: #059669;
+  border-color: #059669;
 }
 
 .table-card :deep(.el-card__body) {
@@ -498,6 +699,10 @@ onMounted(() => {
   font-size: 13px;
 }
 
+.w-full {
+  width: 100%;
+}
+
 /* Dialog Styles */
 .article-dialog :deep(.el-dialog__header) {
   border-bottom: 1px solid #e5e7eb;
@@ -509,7 +714,7 @@ onMounted(() => {
   padding: 24px;
 }
 
-.cover-upload {
+.cover-upload-wrapper {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -526,10 +731,11 @@ onMounted(() => {
   justify-content: center;
   cursor: pointer;
   transition: border-color 0.2s;
+  background-color: #f8fafc;
 }
 
 .cover-uploader:hover {
-  border-color: #409eff;
+  border-color: #10b981;
 }
 
 .cover-preview {
@@ -547,6 +753,7 @@ onMounted(() => {
   font-size: 12px;
   color: #9ca3af;
   margin-top: 8px;
+  line-height: 1.5;
 }
 
 .dialog-footer {

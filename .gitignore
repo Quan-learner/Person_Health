@@ -1,0 +1,32 @@
+# Git Ignore for PersonHealth Project
+
+# Build output
+target/
+dist/
+bin/
+*.class
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# IDE / Editor configuration
+.idea/
+.vscode/
+.zed/
+*.swp
+*.swo
+*.DS_Store
+*.iml
+
+# Submodule specific ignored folders if needed
+personhealthPro/personhealth/target/
+personhealthPro/.idea/
+
+# Environment / Sensitive files
+.env
+.env.*
+uploads/
