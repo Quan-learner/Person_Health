@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Backend (Spring Boot)",
+      "type": "shell",
+      "command": "mvn",
+      "args": [
+        "spring-boot:run"
+      ],
+      "options": {
+        "cwd": "E:\\PersonHealth_Project\\personhealthPro\\personhealth"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$javac"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      }
+    }
+  ]
+}

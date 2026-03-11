@@ -101,6 +101,9 @@
 
     <!-- 个人中心弹窗 -->
     <UserProfileDialog v-model="showProfileDialog" @refresh="handleProfileRefresh" />
+
+    <!-- AI 聊天悬浮窗 -->
+    <AiChatWidget />
   </div>
 </template>
 
@@ -122,6 +125,7 @@ import {
   EditPen
 } from '@element-plus/icons-vue';
 import UserProfileDialog from '@/views/user/components/UserProfileDialog.vue';
+import AiChatWidget from '@/components/AiChatWidget.vue';
 import { useNotificationStore } from '@/stores/notification.js';
 import { useUserStore } from '@/stores/user.js';
 import { useTokenStore } from '@/stores/token.js';

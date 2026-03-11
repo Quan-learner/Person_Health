@@ -1,4 +1,14 @@
 {
   "java.compile.nullAnalysis.mode": "automatic",
-  "java.debug.settings.onBuildFailureProceed": true
+  "java.debug.settings.onBuildFailureProceed": true,
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "args": ["-NoProfile", "-ExecutionPolicy", "Bypass"],
+    },
+  },
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.project.referencedLibraries": ["lib/**/*.jar"],
+  "java.import.maven.enabled": true,
 }
